@@ -14,16 +14,39 @@ use App\Http\Controllers\Api\AuthController;
 |
 */
 
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
 
-Route::middleware('auth:api')->group(function () {
-    // yeha vitra user ko route haru lekni
+Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
+
+Route::prefix('user')->group(function () {
+    Route::middleware('auth:api')->group(function () {
+        Route::middleware('user')->group(function () {
+            Route::get('/me', function () {
+                dd('yeha aayo normal login user vayera');
+            });
+        });
+    });
+});
+
+Route::prefix('doctor')->group(function () {
+    Route::post('register', [AuthController::class, 'doctorRegister']);
+
+    Route::middleware('auth:api')->group(function () {
+        Route::middleware('doctor')->group(function () {
+            Route::get('/me', function () {
+                dd('yeha aayo doctor vayera');
+            });
+        });
+    });
 });
 
 
-Route::middleware('auth:api')->group(function () {
-    Route::middleware('admin')->group(function () {
-        // yeha vitra admin ko route har lekni
+Route::prefix('admin')->group(function () {
+    Route::middleware('auth:api')->group(function () {
+        Route::middleware('admin')->group(function () {
+            Route::get('/me', function () {
+                dd('yeha aayo admin vayera');
+            });
+        });
     });
 });

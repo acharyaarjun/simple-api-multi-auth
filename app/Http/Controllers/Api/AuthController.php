@@ -18,7 +18,7 @@ class AuthController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required',
             'confirm_password' => 'required|same:password',
         ]);
@@ -45,6 +45,39 @@ class AuthController extends BaseController
         $success['user'] =  $user;
 
         return $this->sendResponse($success, 'User created successfully.', 200);
+    }
+
+    public function doctorRegister(Request $request){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required',
+            'confirm_password' => 'required|same:password',
+        ]);
+        if ($validator->fails()) {
+            return $this->sendError('Error Validation', $validator->errors(), 400);
+        }
+
+        $name = $request->input('name');
+        $email = $request->input('email');
+        $password = $request->input('password');
+        // password lai encrypt gareko with the help of hash funciton
+        $password = Hash::make($password);
+        $ldate = date('Y-m-d H:i:s');
+
+        $user = new User;
+        $user->name = $name;
+        $user->email = $email;
+        $user->is_doctor = 'Y';
+        $user->password = $password;
+        $user->email_verified_at = $ldate;
+
+        $user->save();
+
+        $success['token'] =  $user->createToken('l9PassportAuth')->accessToken;
+        $success['user'] =  $user;
+
+        return $this->sendResponse($success, 'Doctor created successfully.', 200);
     }
 
     /**
